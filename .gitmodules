@@ -1,18 +1,6 @@
-[submodule "vendor/glm"]
-	path = vendor/glm
-	url = https://github.com/g-truc/glm
-[submodule "vendor/flecs"]
-	path = vendor/flecs
-	url = https://github.com/SanderMertens/flecs
-[submodule "vendor/webgpu"]
-	path = vendor/webgpu
-	url = https://github.com/eliemichel/WebGPU-distribution.git
-[submodule "vendor/glfw"]
-	path = vendor/glfw
-	url = https://github.com/glfw/glfw.git
-[submodule "vendor/glfw3webgpu"]
-	path = vendor/glfw3webgpu
-	url = https://github.com/eliemichel/glfw3webgpu.git
-[submodule "vendor/imgui/imgui"]
-	path = vendor/imgui/imgui
-	url = https://github.com/ocornut/imgui.git
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw
+[submodule "external/tomlplusplus"]
+	path = external/tomlplusplus
+	url = https://github.com/marzer/tomlplusplus

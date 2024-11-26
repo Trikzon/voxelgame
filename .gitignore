@@ -1,6 +1,6 @@
-cmake-build-debug/
-cmake-build-release/
+# Build System
+build/
+.cache/
 
-.idea/
-
+# MacOS
 .DS_Store

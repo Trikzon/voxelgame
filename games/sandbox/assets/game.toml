@@ -1,0 +1,6 @@
+[game]
+name = "Sandbox"
+package = "sandbox"
+
+[window]
+title = "Sandbox"
