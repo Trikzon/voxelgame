@@ -10,6 +10,7 @@ namespace mellohi
         MH_INFO("Engine Assets Dir: {}", MH_ENGINE_ASSETS_DIR);
         
         m_platform_ptr = init_platform(m_config);
+        m_graphics_ptr = init_graphics(m_config, *m_platform_ptr);
     }
     
     void Engine::run(Game &game)
@@ -21,6 +22,8 @@ namespace mellohi
             m_platform_ptr->process_events();
             
             game.process(*this);
+            
+            m_graphics_ptr->draw_frame();
         }
     }
     

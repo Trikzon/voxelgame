@@ -107,14 +107,16 @@ namespace mellohi
 #endif
 
 #define MH_ASSERT(condition, message, ...) \
-    if (!(condition)) {                    \
+    if (!(condition))                      \
+    {                                      \
         MH_FATAL(message, ##__VA_ARGS__);  \
         std::abort();                      \
     }
 
 #ifdef MH_DEBUG_MODE
 #define MH_ASSERT_DEBUG(condition, message, ...) \
-    if (!(condition)) {                          \
+    if (!(condition))                            \
+    {                                            \
         MH_FATAL(message, ##__VA_ARGS__);        \
         std::abort();                            \
     }

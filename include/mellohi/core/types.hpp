@@ -3,6 +3,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 namespace mellohi
 {
 	using isize = std::ptrdiff_t;
@@ -19,4 +22,30 @@ namespace mellohi
 
 	using f32 = float;
 	using f64 = double;
+	
+	using glm::ivec2;
+	using glm::ivec3;
+	using glm::ivec4;
+	
+	using glm::uvec2;
+	using glm::uvec3;
+	using glm::uvec4;
+	
+	using glm::fvec2;
+	using glm::fvec3;
+	using glm::fvec4;
+	
+	using glm::fmat2x2;
+	using glm::fmat2x3;
+	using glm::fmat2x4;
+	using glm::fmat3x2;
+	using glm::fmat3x3;
+	using glm::fmat3x4;
+	using glm::fmat4x2;
+	using glm::fmat4x3;
+	using glm::fmat4x4;
+	
+	using glm::quat;
 }
+
+#define MH_CONTAINS(vector, value) std::find(vector.begin(), vector.end(), value) != vector.end()
