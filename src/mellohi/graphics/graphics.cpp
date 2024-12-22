@@ -6,10 +6,10 @@
 
 namespace mellohi
 {
-    std::shared_ptr<Graphics> init_graphics(const Config &config, const Platform &platform)
+    std::shared_ptr<class Graphics> init_graphics(const Config &config, std::shared_ptr<Platform> platform_ptr)
     {
         #ifdef MH_GRAPHICS_VULKAN
-            return std::make_shared<VulkanGraphics>(config, platform);
+            return std::make_shared<VulkanGraphics>(config, platform_ptr);
         #else
             MH_ASSERT(false, "No graphics backend has been selected.");
             return nullptr;

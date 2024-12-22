@@ -15,5 +15,5 @@ namespace mellohi
         virtual void draw_frame() = 0;
     };
     
-    std::shared_ptr<Graphics> init_graphics(const Config &config, const Platform &platform);
+    std::shared_ptr<Graphics> init_graphics(const Config &config, std::shared_ptr<Platform> platform_ptr);
 }

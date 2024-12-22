@@ -3,90 +3,12 @@
 #include "mellohi/core/asset.hpp"
 #include "mellohi/core/logger.hpp"
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
-
 namespace mellohi
 {
-    static VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-        VkDebugUtilsMessageTypeFlagsEXT message_types,
-        const VkDebugUtilsMessengerCallbackDataEXT *callback_data_ptr,
-        void *user_data_ptr)
+    VulkanGraphics::VulkanGraphics(const Config &config, std::shared_ptr<Platform> platform_ptr)
     {
-        switch (message_severity)
-        {
-        default:
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            MH_ERROR(callback_data_ptr->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            MH_WARN(callback_data_ptr->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            MH_INFO(callback_data_ptr->pMessage);
-            break;
-        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            MH_TRACE(callback_data_ptr->pMessage);
-            break;
-        }
-        
-        return VK_FALSE;
-    }
-    
-    constexpr vk::DebugUtilsMessengerCreateInfoEXT debug_utils_messenger_create_info
-    {
-        .flags = {},
-        .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-                         | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
-                         // | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
-                         // | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose,
-        .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-                     | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-                     | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
-        .pfnUserCallback = vk_debug_callback,
-        .pUserData = {},
-    };
-    
-    QueueFamilyIndices::QueueFamilyIndices(vk::PhysicalDevice physical_device, vk::SurfaceKHR surface)
-    {
-        const auto queue_families = physical_device.getQueueFamilyProperties();
-        
-        for (auto i = 0; i < queue_families.size(); ++i)
-        {
-            const auto &queue_family = queue_families[i];
-            if (queue_family.queueFlags & vk::QueueFlagBits::eGraphics)
-            {
-                graphics_family = i;
-            }
-            
-            VkBool32 present_support = false;
-            const auto _ = physical_device.getSurfaceSupportKHR(i, surface, &present_support);
-            if (present_support)
-            {
-                present_family = i;
-            }
-        }
-    }
-    
-    bool QueueFamilyIndices::is_complete() const
-    {
-        return graphics_family.has_value() && present_family.has_value();
-    }
-    
-    std::set<u32> QueueFamilyIndices::get_unique_queue_families() const
-    {
-        return {graphics_family.value(), present_family.value()};
-    }
-    
-    VulkanGraphics::VulkanGraphics(const Config &config, const Platform &platform)
-    {
-        VULKAN_HPP_DEFAULT_DISPATCHER.init();
-        create_instance(config, platform);
-        create_debug_utils_messenger();
-        m_surface = platform.create_vulkan_surface(m_instance);
-        choose_physical_device();
-        create_logical_device();
-        create_swapchain(platform);
+        m_device_ptr = std::make_shared<Device>(config, *platform_ptr);
+        create_swapchain(*platform_ptr);
         create_image_views();
         create_render_pass();
         create_graphics_pipeline();
@@ -98,53 +20,42 @@ namespace mellohi
     
     VulkanGraphics::~VulkanGraphics()
     {
-        const auto result = m_device.waitIdle();
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to wait for Vulkan device.");
+        m_device_ptr->wait_idle();
         
         for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            m_device.destroyFence(m_in_flight_fences[i]);
-            m_device.destroySemaphore(m_render_finished_semaphores[i]);
-            m_device.destroySemaphore(m_image_available_semaphores[i]);
+            m_device_ptr->destroy_fence(m_in_flight_fences[i]);
+            m_device_ptr->destroy_semaphore(m_render_finished_semaphores[i]);
+            m_device_ptr->destroy_semaphore(m_image_available_semaphores[i]);
         }
-        m_device.destroy(m_command_pool);
+        m_device_ptr->destroy_command_pool(m_command_pool);
         for (const auto &swapchain_framebuffer : m_swapchain_framebuffers)
         {
-            m_device.destroy(swapchain_framebuffer);
+            m_device_ptr->destroy_framebuffer(swapchain_framebuffer);
         }
-        m_device.destroy(m_graphics_pipeline);
-        m_device.destroy(m_pipeline_layout);
-        m_device.destroy(m_render_pass);
+        m_device_ptr->destroy_pipeline(m_graphics_pipeline);
+        m_device_ptr->destroy_pipeline_layout(m_pipeline_layout);
+        m_device_ptr->destroy_render_pass(m_render_pass);
         for (const auto &image_view : m_swapchain_image_views)
         {
-            m_device.destroyImageView(image_view);
+            m_device_ptr->destroy_image_view(image_view);
         }
-        m_device.destroySwapchainKHR(m_swapchain);
-        m_device.destroy();
-        
-        m_instance.destroySurfaceKHR(m_surface);
-        if (m_debug_utils_messenger)
-        {
-            m_instance.destroyDebugUtilsMessengerEXT(m_debug_utils_messenger);
-        }
-        m_instance.destroy();
+        m_device_ptr->destroy_swapchain(m_swapchain);
     }
     
     void VulkanGraphics::draw_frame()
     {
-        auto result = m_device.waitForFences(1, &m_in_flight_fences[m_current_frame], vk::True,
-                                             std::numeric_limits<u64>::max());
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to wait for Vulkan fence.");
-        
-        result = m_device.resetFences(1, &m_in_flight_fences[m_current_frame]);
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to reset Vulkan fence.");
+        m_device_ptr->wait_for_fence(m_in_flight_fences[m_current_frame]);
+        m_device_ptr->reset_fence(m_in_flight_fences[m_current_frame]);
         
         u32 image_index;
-        result = m_device.acquireNextImageKHR(m_swapchain, std::numeric_limits<u64>::max(),
-                                              m_image_available_semaphores[m_current_frame], {}, &image_index);
+        auto result = m_device_ptr->get_device().acquireNextImageKHR(m_swapchain, std::numeric_limits<u64>::max(),
+                                                                m_image_available_semaphores[m_current_frame], {},
+                                                                &image_index);
         MH_ASSERT(result == vk::Result::eSuccess, "Failed to acquire Vulkan swapchain image.");
         
         m_command_buffers[m_current_frame].reset();
+        
         record_command_buffer(image_index);
         
         const vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame]};
@@ -162,7 +73,8 @@ namespace mellohi
             .pSignalSemaphores = signal_semaphores,
         };
         
-        result = m_graphics_queue.submit(1, &submit_info, m_in_flight_fences[m_current_frame]);
+        result = m_device_ptr->get_queue(QueueCapability::Graphics)
+            .submit(1, &submit_info, m_in_flight_fences[m_current_frame]);
         MH_ASSERT(result == vk::Result::eSuccess, "Failed to submit Vulkan queue.");
         
         const vk::PresentInfoKHR present_info
@@ -175,146 +87,15 @@ namespace mellohi
             .pResults = nullptr,
         };
         
-        result = m_present_queue.presentKHR(present_info);
+        result = m_device_ptr->get_queue(QueueCapability::Present).presentKHR(present_info);
         MH_ASSERT(result == vk::Result::eSuccess, "Failed to present Vulkan queue.");
         
         m_current_frame = (m_current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
     
-    void VulkanGraphics::create_instance(const Config &config, const Platform &platform)
-    {
-        const vk::ApplicationInfo app_info
-        {
-            .pApplicationName = config.game.name.c_str(),
-            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-            .pEngineName = config.engine.name.c_str(),
-            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-            .apiVersion = VK_API_VERSION_1_3,
-        };
-        
-        const auto required_extensions = get_required_instance_extensions(platform);
-        const auto required_validation_layers = get_required_validation_layers();
-        
-        vk::InstanceCreateFlagBits flags = {};
-        if (MH_CONTAINS(required_extensions, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME))
-        {
-            flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-        }
-        
-        const void *next_ptr = nullptr;
-        if (MH_CONTAINS(required_extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
-        {
-            next_ptr = &debug_utils_messenger_create_info;
-        }
-        
-        const vk::InstanceCreateInfo instance_create_info
-        {
-            .pNext = next_ptr,
-            .flags = flags,
-            .pApplicationInfo = &app_info,
-            .enabledLayerCount = static_cast<u32>(required_validation_layers.size()),
-            .ppEnabledLayerNames = required_validation_layers.data(),
-            .enabledExtensionCount = static_cast<u32>(required_extensions.size()),
-            .ppEnabledExtensionNames = required_extensions.data(),
-        };
-        
-        const auto instance_result = vk::createInstance(instance_create_info);
-        MH_ASSERT_VK(instance_result, "Failed to create Vulkan instance.");
-        m_instance = instance_result.value;
-        
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(m_instance);
-    }
-    
-    void VulkanGraphics::create_debug_utils_messenger()
-    {
-        #ifdef MH_DEBUG_MODE
-            const auto result = m_instance.createDebugUtilsMessengerEXT(debug_utils_messenger_create_info);
-            MH_ASSERT_VK(result, "Failed to create Vulkan debug utils messenger.");
-            m_debug_utils_messenger = result.value;
-        #endif
-    }
-    
-    void VulkanGraphics::choose_physical_device()
-    {
-        const auto physical_devices_result = m_instance.enumeratePhysicalDevices();
-        MH_ASSERT_VK(physical_devices_result, "Failed to enumerate Vulkan physical devices.");
-        const auto physical_devices = physical_devices_result.value;
-        
-        MH_ASSERT(!physical_devices.empty(), "Failed to find GPUs with Vulkan support.");
-        
-        for (const auto &physical_device : physical_devices)
-        {
-            const QueueFamilyIndices queue_family_indices(physical_device, m_surface);
-            
-            const auto surface_format_results = physical_device.getSurfaceFormatsKHR(m_surface);
-            if (surface_format_results.value.empty())
-            {
-                continue;
-            }
-            
-            const auto present_modes = physical_device.getSurfacePresentModesKHR(m_surface);
-            if (present_modes.value.empty())
-            {
-                continue;
-            }
-            
-            if (queue_family_indices.is_complete())
-            {
-                m_physical_device = physical_device;
-                
-                const auto properties = m_physical_device.getProperties();
-                MH_INFO("Selected GPU {}.", properties.deviceName);
-                
-                break;    
-            }
-        }
-        
-        MH_ASSERT(m_physical_device, "Failed to find a suitable GPU.");
-    }
-    
-    void VulkanGraphics::create_logical_device()
-    {
-        const QueueFamilyIndices queue_family_indices(m_physical_device, m_surface);
-        
-        std::vector<vk::DeviceQueueCreateInfo> device_queue_create_infos;
-        const f32 queue_priority = 1.0f;
-        for (const u32 queue_family : queue_family_indices.get_unique_queue_families())
-        {
-            device_queue_create_infos.push_back(vk::DeviceQueueCreateInfo
-            {
-                .queueFamilyIndex = queue_family,
-                .queueCount = 1,
-                .pQueuePriorities = &queue_priority,
-            });
-        }
-        
-        const vk::PhysicalDeviceFeatures physical_device_features;
-        
-        const auto required_device_extensions = get_required_device_extensions();
-        const auto required_validation_layers = get_required_validation_layers();
-        
-        const vk::DeviceCreateInfo device_create_info
-        {
-            .queueCreateInfoCount = static_cast<u32>(device_queue_create_infos.size()),
-            .pQueueCreateInfos = device_queue_create_infos.data(),
-            .pEnabledFeatures = &physical_device_features,
-            .enabledLayerCount = static_cast<u32>(required_validation_layers.size()),
-            .ppEnabledLayerNames = required_validation_layers.data(),
-            .enabledExtensionCount = static_cast<u32>(required_device_extensions.size()),
-            .ppEnabledExtensionNames = required_device_extensions.data(),
-        };
-        
-        const auto device_result = m_physical_device.createDevice(device_create_info);
-        MH_ASSERT_VK(device_result, "Failed to create Vulkan logical device.");
-        m_device = device_result.value;
-        
-        m_device.getQueue(queue_family_indices.graphics_family.value(), 0, &m_graphics_queue);
-        m_device.getQueue(queue_family_indices.present_family.value(), 0, &m_present_queue);
-    }
-    
     void VulkanGraphics::create_swapchain(const Platform &platform)
     {
-        const auto available_surface_formats = m_physical_device.getSurfaceFormatsKHR(m_surface).value;
+        const auto available_surface_formats = m_device_ptr->get_surface_formats();
         auto surface_format = available_surface_formats[0];
         for (const auto &available_surface_format : available_surface_formats)
         {
@@ -328,7 +109,7 @@ namespace mellohi
         
         m_swapchain_image_format = surface_format.format;
         
-        const auto available_present_modes = m_physical_device.getSurfacePresentModesKHR(m_surface).value;
+        const auto available_present_modes = m_device_ptr->get_surface_present_modes();
         auto present_mode = vk::PresentModeKHR::eFifo;
         for (const auto &available_present_mode : available_present_modes)
         {
@@ -339,10 +120,7 @@ namespace mellohi
             }
         }
         
-        const auto surface_capabilities_result = m_physical_device.getSurfaceCapabilitiesKHR(m_surface);
-        MH_ASSERT_VK(surface_capabilities_result, "Failed to get Vulkan surface capabilities from physical device.");
-        const auto surface_capabilities = surface_capabilities_result.value;
-        
+        const auto surface_capabilities = m_device_ptr->get_surface_capabilities();
         m_swapchain_extent = surface_capabilities.currentExtent;
         if (surface_capabilities.currentExtent.width == std::numeric_limits<u32>::max())
         {
@@ -363,7 +141,7 @@ namespace mellohi
         
         vk::SwapchainCreateInfoKHR swapchain_create_info
         {
-            .surface = m_surface,
+            .surface = m_device_ptr->get_surface(),
             .minImageCount = image_count,
             .imageFormat = surface_format.format,
             .imageColorSpace = surface_format.colorSpace,
@@ -376,31 +154,24 @@ namespace mellohi
             .clipped = vk::True,
         };
         
-        const QueueFamilyIndices queue_family_indices(m_physical_device, m_surface);
-        const auto unique_queue_families = queue_family_indices.get_unique_queue_families();
+        const auto unique_queue_families = m_device_ptr->get_unique_queue_family_indices();
         if (unique_queue_families.size() > 1)
         {
-            const std::vector<u32> unique_queue_families_v(unique_queue_families.begin(), unique_queue_families.end());
             swapchain_create_info.imageSharingMode = vk::SharingMode::eConcurrent;
-            swapchain_create_info.queueFamilyIndexCount = unique_queue_families_v.size();
-            swapchain_create_info.pQueueFamilyIndices = unique_queue_families_v.data();
+            swapchain_create_info.queueFamilyIndexCount = unique_queue_families.size();
+            swapchain_create_info.pQueueFamilyIndices = unique_queue_families.data();
         }
         else
         {
             swapchain_create_info.imageSharingMode = vk::SharingMode::eExclusive;
         }
         
-        const auto swapchain_result = m_device.createSwapchainKHR(swapchain_create_info);
-        MH_ASSERT_VK(swapchain_result, "Failed to create Vulkan swapchain.");
-        m_swapchain = swapchain_result.value;
-        
+        m_swapchain = m_device_ptr->create_swapchain(swapchain_create_info);
     }
     
     void VulkanGraphics::create_image_views()
     {
-        const auto swapchain_images_result = m_device.getSwapchainImagesKHR(m_swapchain);
-        MH_ASSERT_VK(swapchain_images_result, "Failed to get Vulkan swapchain images.");
-        const auto swapchain_images = swapchain_images_result.value;
+        const auto swapchain_images = m_device_ptr->get_swapchain_images(m_swapchain);
     
         for (const auto &swapchain_image : swapchain_images)
         {
@@ -426,9 +197,7 @@ namespace mellohi
                 },
             };
             
-            const auto image_view_result = m_device.createImageView(image_view_create_info);
-            MH_ASSERT_VK(image_view_result, "Failed to create Vulkan image view.");
-            m_swapchain_image_views.push_back(image_view_result.value);
+            m_swapchain_image_views.push_back(m_device_ptr->create_image_view(image_view_create_info));
         }
     }
     
@@ -479,9 +248,7 @@ namespace mellohi
             .pDependencies = &subpass_dependency,
         };
         
-        const auto render_pass_result = m_device.createRenderPass(render_pass_create_info);
-        MH_ASSERT_VK(render_pass_result, "Failed to create Vulkan render pass.");
-        m_render_pass = render_pass_result.value;
+        m_render_pass = m_device_ptr->create_render_pass(render_pass_create_info);
     }
     
     void VulkanGraphics::create_graphics_pipeline()
@@ -494,18 +261,14 @@ namespace mellohi
             .codeSize = vert_shader_code.size(),
             .pCode = reinterpret_cast<const u32 *>(vert_shader_code.data()),
         };
-        const auto vert_shader_module_result = m_device.createShaderModule(vert_shader_module_create_info);
-        MH_ASSERT_VK(vert_shader_module_result, "Failed to create Vulkan vertex shader module.");
-        const auto vert_shader_module = vert_shader_module_result.value;
+        const auto vert_shader_module = m_device_ptr->create_shader_module(vert_shader_module_create_info);
         
         const vk::ShaderModuleCreateInfo frag_shader_module_create_info
         {
             .codeSize = frag_shader_code.size(),
             .pCode = reinterpret_cast<const u32 *>(frag_shader_code.data()),
         };
-        const auto frag_shader_module_result = m_device.createShaderModule(frag_shader_module_create_info);
-        MH_ASSERT_VK(frag_shader_module_result, "Failed to create Vulkan fragment shader module.");
-        const auto frag_shader_module = frag_shader_module_result.value;
+        const auto frag_shader_module = m_device_ptr->create_shader_module(frag_shader_module_create_info);
         
         const vk::PipelineShaderStageCreateInfo shader_stages[]
         {
@@ -606,9 +369,7 @@ namespace mellohi
             .pPushConstantRanges = nullptr,
         };
         
-        const auto pipeline_layout_result = m_device.createPipelineLayout(pipeline_layout_create_info);
-        MH_ASSERT_VK(pipeline_layout_result, "Failed to create Vulkan pipeline layout.");
-        m_pipeline_layout = pipeline_layout_result.value;
+        m_pipeline_layout = m_device_ptr->create_pipeline_layout(pipeline_layout_create_info);
         
         const vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info
         {
@@ -629,12 +390,10 @@ namespace mellohi
             .basePipelineIndex = -1,
         };
         
-        const auto graphics_pipeline_result = m_device.createGraphicsPipeline(nullptr, graphics_pipeline_create_info);
-        MH_ASSERT_VK(graphics_pipeline_result, "Failed to create Vulkan graphics pipeline.");
-        m_graphics_pipeline = graphics_pipeline_result.value;
+        m_graphics_pipeline = m_device_ptr->create_graphics_pipeline(graphics_pipeline_create_info);
         
-        m_device.destroyShaderModule(frag_shader_module);
-        m_device.destroyShaderModule(vert_shader_module);
+        m_device_ptr->destroy_shader_module(frag_shader_module);
+        m_device_ptr->destroy_shader_module(vert_shader_module);
     }
     
     void VulkanGraphics::create_framebuffers()
@@ -651,25 +410,19 @@ namespace mellohi
                 .layers = 1,
             };
             
-            const auto framebuffer_result = m_device.createFramebuffer(framebuffer_create_info);
-            MH_ASSERT_VK(framebuffer_result, "Failed to create Vulkan framebuffer.");
-            m_swapchain_framebuffers.push_back(framebuffer_result.value);
+            m_swapchain_framebuffers.push_back(m_device_ptr->create_framebuffer(framebuffer_create_info));
         }
     }
     
     void VulkanGraphics::create_command_pool()
     {
-        const QueueFamilyIndices queue_family_indices(m_physical_device, m_surface);
-        
         const vk::CommandPoolCreateInfo command_pool_create_info
         {
             .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-            .queueFamilyIndex = queue_family_indices.graphics_family.value(),
+            .queueFamilyIndex = m_device_ptr->get_queue_family_index(QueueCapability::Graphics),
         };
         
-        const auto command_pool_result = m_device.createCommandPool(command_pool_create_info);
-        MH_ASSERT_VK(command_pool_result, "Failed to create Vulkan command pool.");
-        m_command_pool = command_pool_result.value;
+        m_command_pool = m_device_ptr->create_command_pool(command_pool_create_info);
     }
     
     void VulkanGraphics::create_command_buffers()
@@ -681,14 +434,11 @@ namespace mellohi
             .commandBufferCount = static_cast<u32>(MAX_FRAMES_IN_FLIGHT),
         };
         
-        const auto command_buffer_result = m_device.allocateCommandBuffers(command_buffer_allocate_info);
-        MH_ASSERT_VK(command_buffer_result, "Failed to allocate Vulkan command buffer.");
-        m_command_buffers = command_buffer_result.value;
+        m_command_buffers = m_device_ptr->allocate_command_buffers(command_buffer_allocate_info);
     }
     
     void VulkanGraphics::create_sync_objects()
     {
-        const vk::SemaphoreCreateInfo semaphore_create_info;
         const vk::FenceCreateInfo fence_create_info
         {
             .flags = vk::FenceCreateFlagBits::eSignaled,
@@ -696,17 +446,9 @@ namespace mellohi
         
         for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
         {
-            auto semaphore_result = m_device.createSemaphore(semaphore_create_info);
-            MH_ASSERT_VK(semaphore_result, "Failed to create Vulkan semaphore.");
-            m_image_available_semaphores.push_back(semaphore_result.value);
-            
-            semaphore_result = m_device.createSemaphore(semaphore_create_info);
-            MH_ASSERT_VK(semaphore_result, "Failed to create Vulkan semaphore.");
-            m_render_finished_semaphores.push_back(semaphore_result.value);
-            
-            const auto fence_result = m_device.createFence(fence_create_info);
-            MH_ASSERT_VK(fence_result, "Failed to create Vulkan fence.");
-            m_in_flight_fences.push_back(fence_result.value);
+            m_image_available_semaphores.push_back(m_device_ptr->create_semaphore({}));
+            m_render_finished_semaphores.push_back(m_device_ptr->create_semaphore({}));
+            m_in_flight_fences.push_back(m_device_ptr->create_fence(fence_create_info));
         }
     }
     
@@ -770,46 +512,5 @@ namespace mellohi
         
         const auto end_result = m_command_buffers[m_current_frame].end();
         MH_ASSERT(end_result == vk::Result::eSuccess, "Failed to end recording Vulkan command buffer.");
-    }
-    
-    // TODO: Validate whether extensions and layers are available.
-    std::vector<const char *> VulkanGraphics::get_required_instance_extensions(const Platform &platform)
-    {
-        auto required_extensions = platform.get_required_vulkan_instance_extensions();
-        
-        #ifdef __APPLE__
-            required_extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-        #endif
-        
-        #ifdef MH_DEBUG_MODE
-            required_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-        #endif
-        
-        return required_extensions;
-    }
-    
-    std::vector<const char *> VulkanGraphics::get_required_device_extensions()
-    {
-        std::vector<const char *> required_extensions
-        {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        };
-        
-        #ifdef __APPLE__
-            required_extensions.push_back("VK_KHR_portability_subset");
-        #endif
-        
-        return required_extensions;
-    }
-    
-    std::vector<const char *> VulkanGraphics::get_required_validation_layers()
-    {
-        std::vector<const char *> required_validation_layers;
-        
-        #ifdef MH_DEBUG_MODE
-            required_validation_layers.push_back("VK_LAYER_KHRONOS_validation");
-        #endif
-        
-        return required_validation_layers;
     }
 }

@@ -15,6 +15,7 @@ set(INCLUDES
     include/mellohi/core/logger.hpp
     include/mellohi/core/types.hpp
     include/mellohi/graphics/graphics.hpp
+    include/mellohi/graphics/vulkan/device.hpp
     include/mellohi/graphics/vulkan/vulkan.hpp
     include/mellohi/graphics/vulkan/vulkan_graphics.hpp
     include/mellohi/platform/platform.hpp
@@ -26,6 +27,7 @@ set(SOURCES
     src/mellohi/core/config.cpp
     src/mellohi/core/engine.cpp
     src/mellohi/graphics/graphics.cpp
+    src/mellohi/graphics/vulkan/device.cpp
     src/mellohi/graphics/vulkan/vulkan_graphics.cpp
     src/mellohi/platform/platform.cpp
     src/mellohi/platform/glfw/glfw_platform.cpp
