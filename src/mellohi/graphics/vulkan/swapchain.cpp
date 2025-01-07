@@ -1,14 +1,14 @@
 #include "mellohi/graphics/vulkan/swapchain.hpp"
 
+#include "mellohi/graphics/vulkan/render_pass.hpp"
+
 namespace mellohi
 {
-    Swapchain::Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr,
-                         vk::RenderPass render_pass)
-        : m_platform_ptr(platform_ptr), m_device_ptr(device_ptr), m_render_pass(render_pass)
+    Swapchain::Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr)
+        : m_platform_ptr(platform_ptr), m_device_ptr(device_ptr)
     {
         create_swapchain();
         create_image_views();
-        create_framebuffers();
         create_sync_objects();
     }
 
@@ -22,6 +22,13 @@ namespace mellohi
             m_device_ptr->destroy_semaphore(m_render_finished_semaphores[i]);
             m_device_ptr->destroy_semaphore(m_image_available_semaphores[i]);
         }
+    }
+    
+    void Swapchain::init_with_render_pass(vk::RenderPass render_pass)
+    {
+        m_render_pass = render_pass;
+        
+        create_framebuffers();
     }
     
     std::optional<u32> Swapchain::acquire_next_image_index()

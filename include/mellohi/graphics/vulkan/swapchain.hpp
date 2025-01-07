@@ -7,11 +7,12 @@ namespace mellohi
     class Swapchain
     {
     public:
-        const usize MAX_FRAMES_IN_FLIGHT = 2;
+        const static usize MAX_FRAMES_IN_FLIGHT = 2;
     
-        Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr,
-                  vk::RenderPass render_pass);
+        Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr);
         ~Swapchain();
+        
+        void init_with_render_pass(vk::RenderPass render_pass);
         
         [[nodiscard]] std::optional<u32> acquire_next_image_index();
         void present(u32 image_index, vk::CommandBuffer command_buffer);

@@ -16,6 +16,7 @@ set(INCLUDES
     include/mellohi/core/types.hpp
     include/mellohi/graphics/graphics.hpp
     include/mellohi/graphics/vulkan/device.hpp
+    include/mellohi/graphics/vulkan/render_pass.hpp
     include/mellohi/graphics/vulkan/swapchain.hpp
     include/mellohi/graphics/vulkan/vulkan.hpp
     include/mellohi/graphics/vulkan/vulkan_graphics.hpp
@@ -29,6 +30,7 @@ set(SOURCES
     src/mellohi/core/engine.cpp
     src/mellohi/graphics/graphics.cpp
     src/mellohi/graphics/vulkan/device.cpp
+    src/mellohi/graphics/vulkan/render_pass.cpp
     src/mellohi/graphics/vulkan/swapchain.cpp
     src/mellohi/graphics/vulkan/vulkan_graphics.cpp
     src/mellohi/platform/platform.cpp
