@@ -4,7 +4,7 @@
 
 namespace mellohi
 {
-    VulkanGraphics::VulkanGraphics(const Config &config, std::shared_ptr<Platform> platform_ptr)
+    VulkanGraphics::VulkanGraphics(const Config &config, const std::shared_ptr<Platform> platform_ptr)
     {
         m_device_ptr = std::make_shared<Device>(config, *platform_ptr);
         m_swapchain_ptr = std::make_shared<Swapchain>(platform_ptr, m_device_ptr);

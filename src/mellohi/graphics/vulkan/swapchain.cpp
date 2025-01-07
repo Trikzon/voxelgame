@@ -1,10 +1,8 @@
 #include "mellohi/graphics/vulkan/swapchain.hpp"
 
-#include "mellohi/graphics/vulkan/render_pass.hpp"
-
 namespace mellohi
 {
-    Swapchain::Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr)
+    Swapchain::Swapchain(const std::shared_ptr<Platform> platform_ptr, const std::shared_ptr<Device> device_ptr)
         : m_platform_ptr(platform_ptr), m_device_ptr(device_ptr)
     {
         create_swapchain();
@@ -24,7 +22,7 @@ namespace mellohi
         }
     }
     
-    void Swapchain::init_with_render_pass(vk::RenderPass render_pass)
+    void Swapchain::init_with_render_pass(const vk::RenderPass render_pass)
     {
         m_render_pass = render_pass;
         
@@ -55,7 +53,7 @@ namespace mellohi
         return image_index;
     }
     
-    void Swapchain::present(u32 image_index, vk::CommandBuffer command_buffer)
+    void Swapchain::present(const u32 image_index, const vk::CommandBuffer command_buffer)
     {
         const vk::Semaphore wait_semaphores[] = {m_image_available_semaphores[m_current_frame_index]};
         const vk::PipelineStageFlags wait_stages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -75,7 +73,7 @@ namespace mellohi
         const auto graphics_queue = m_device_ptr->get_queue(QueueCapability::Graphics);
         
         auto result = graphics_queue.submit(1, &submit_info, m_in_flight_fences[m_current_frame_index]);
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to submit Vulkan queue.");
+        MH_ASSERT_VK(result, "Failed to submit Vulkan queue.");
         
         const vk::PresentInfoKHR present_info
         {
@@ -120,7 +118,7 @@ namespace mellohi
         return m_image_views;
     }
     
-    vk::Framebuffer Swapchain::get_framebuffer(u32 image_index) const
+    vk::Framebuffer Swapchain::get_framebuffer(const u32 image_index) const
     {
         return m_framebuffers[image_index];
     }

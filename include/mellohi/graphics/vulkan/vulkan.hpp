@@ -18,9 +18,9 @@
 #include <vulkan/vulkan_enums.hpp> // IWYU pragma: export
 #include <vulkan/vulkan_handles.hpp> // IWYU pragma: export
 
-#define MH_ASSERT_VK(vk_result, message, ...)     \
-    if (vk_result.result != vk::Result::eSuccess) \
-    {                                             \
-        MH_FATAL(message, ##__VA_ARGS__);         \
-        std::abort();                             \
+#define MH_ASSERT_VK(vk_result, message, ...) \
+    if (vk_result != vk::Result::eSuccess)    \
+    {                                         \
+        MH_FATAL(message, ##__VA_ARGS__);     \
+        std::abort();                         \
     }

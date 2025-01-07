@@ -29,148 +29,148 @@ namespace mellohi
         m_instance.destroy();
     }
     
-    void Device::reset_fence(vk::Fence fence) const
+    void Device::reset_fence(const vk::Fence fence) const
     {
         const auto result = m_device.resetFences(1, &fence);
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to reset Vulkan fence.");
+        MH_ASSERT_VK(result, "Failed to reset Vulkan fence.");
     }
     
-    void Device::wait_for_fence(vk::Fence fence, u64 timeout) const
+    void Device::wait_for_fence(const vk::Fence fence, const u64 timeout) const
     {
         const auto result = m_device.waitForFences(1, &fence, vk::True, timeout);
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to wait for Vulkan fence.");
+        MH_ASSERT_VK(result, "Failed to wait for Vulkan fence.");
     }
     
     void Device::wait_idle() const
     {
         const auto result = m_device.waitIdle();
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to wait for Vulkan device.");
+        MH_ASSERT_VK(result, "Failed to wait for Vulkan device.");
     }
     
     std::vector<vk::CommandBuffer> Device::allocate_command_buffers(
         const vk::CommandBufferAllocateInfo &allocate_info) const
     {
         const auto resval = m_device.allocateCommandBuffers(allocate_info);
-        MH_ASSERT_VK(resval, "Failed to allocate Vulkan command buffer.");
+        MH_ASSERT_VK(resval.result, "Failed to allocate Vulkan command buffer.");
         return resval.value;
     }
     
     vk::CommandPool Device::create_command_pool(const vk::CommandPoolCreateInfo &create_info) const
     {
         const auto resval = m_device.createCommandPool(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan command pool.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan command pool.");
         return resval.value;
     }
     
     vk::Fence Device::create_fence(const vk::FenceCreateInfo &create_info) const
     {
         const auto resval = m_device.createFence(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan fence.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan fence.");
         return resval.value;
     }
     
     vk::Framebuffer Device::create_framebuffer(const vk::FramebufferCreateInfo &create_info) const
     {
         const auto resval = m_device.createFramebuffer(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan framebuffer.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan framebuffer.");
         return resval.value;
     }
     
     vk::Pipeline Device::create_graphics_pipeline(const vk::GraphicsPipelineCreateInfo &create_info) const
     {
         const auto resval = m_device.createGraphicsPipeline(nullptr, create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan graphics pipeline.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan graphics pipeline.");
         return resval.value;
     }
     
     vk::ImageView Device::create_image_view(const vk::ImageViewCreateInfo &create_info) const
     {
         const auto resval = m_device.createImageView(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan image view.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan image view.");
         return resval.value;
     }
     
     vk::PipelineLayout Device::create_pipeline_layout(const vk::PipelineLayoutCreateInfo &create_info) const
     {
         const auto resval = m_device.createPipelineLayout(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan pipeline layout.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan pipeline layout.");
         return resval.value;
     }
     
     vk::RenderPass Device::create_render_pass(const vk::RenderPassCreateInfo &create_info) const
     {
         const auto resval = m_device.createRenderPass(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan render pass.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan render pass.");
         return resval.value;
     }
     
     vk::Semaphore Device::create_semaphore(const vk::SemaphoreCreateInfo &create_info) const
     {
         const auto resval = m_device.createSemaphore(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan semaphore.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan semaphore.");
         return resval.value;
     }
     
     vk::ShaderModule Device::create_shader_module(const vk::ShaderModuleCreateInfo &create_info) const
     {
         const auto resval = m_device.createShaderModule(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan shader module.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan shader module.");
         return resval.value;
     }
     
     vk::SwapchainKHR Device::create_swapchain(const vk::SwapchainCreateInfoKHR &create_info) const
     {
         const auto resval = m_device.createSwapchainKHR(create_info);
-        MH_ASSERT_VK(resval, "Failed to create Vulkan swapchain.");
+        MH_ASSERT_VK(resval.result, "Failed to create Vulkan swapchain.");
         return resval.value;
     }
     
-    void Device::destroy_command_pool(vk::CommandPool command_pool) const
+    void Device::destroy_command_pool(const vk::CommandPool command_pool) const
     {
         m_device.destroyCommandPool(command_pool);
     }
     
-    void Device::destroy_fence(vk::Fence fence) const
+    void Device::destroy_fence(const vk::Fence fence) const
     {
         m_device.destroyFence(fence);
     }
     
-    void Device::destroy_framebuffer(vk::Framebuffer framebuffer) const
+    void Device::destroy_framebuffer(const vk::Framebuffer framebuffer) const
     {
         m_device.destroyFramebuffer(framebuffer);
     }
     
-    void Device::destroy_image_view(vk::ImageView image_view) const
+    void Device::destroy_image_view(const vk::ImageView image_view) const
     {
         m_device.destroyImageView(image_view);
     }
     
-    void Device::destroy_pipeline(vk::Pipeline pipeline) const
+    void Device::destroy_pipeline(const vk::Pipeline pipeline) const
     {
         m_device.destroyPipeline(pipeline);
     }
     
-    void Device::destroy_pipeline_layout(vk::PipelineLayout pipeline_layout) const
+    void Device::destroy_pipeline_layout(const vk::PipelineLayout pipeline_layout) const
     {
         m_device.destroyPipelineLayout(pipeline_layout);
     }
     
-    void Device::destroy_render_pass(vk::RenderPass render_pass) const
+    void Device::destroy_render_pass(const vk::RenderPass render_pass) const
     {
         m_device.destroyRenderPass(render_pass);
     }
     
-    void Device::destroy_semaphore(vk::Semaphore semaphore) const
+    void Device::destroy_semaphore(const vk::Semaphore semaphore) const
     {
         m_device.destroySemaphore(semaphore);
     }
     
-    void Device::destroy_shader_module(vk::ShaderModule shader_module) const
+    void Device::destroy_shader_module(const vk::ShaderModule shader_module) const
     {
         m_device.destroyShaderModule(shader_module);
     }
     
-    void Device::destroy_swapchain(vk::SwapchainKHR swapchain) const
+    void Device::destroy_swapchain(const vk::SwapchainKHR swapchain) const
     {
         m_device.destroySwapchainKHR(swapchain);
     }
@@ -195,14 +195,14 @@ namespace mellohi
         return m_preferred_surface_format;
     }
     
-    vk::Queue Device::get_queue(QueueCapability capability) const
+    vk::Queue Device::get_queue(const QueueCapability capability) const
     {
         const auto queue_it = m_queues.find(get_queue_family_index(capability));
         MH_ASSERT(queue_it != m_queues.end(), "Device is missing queue for capability {}.", capability);
         return queue_it->second;
     }
     
-    u32 Device::get_queue_family_index(QueueCapability capability) const
+    u32 Device::get_queue_family_index(const QueueCapability capability) const
     {
         const auto queue_family_it = m_queue_family_indices.find(capability);
         MH_ASSERT(queue_family_it != m_queue_family_indices.end(), "Device is missing queue family for capability {}.", capability);
@@ -218,28 +218,28 @@ namespace mellohi
     vk::SurfaceCapabilitiesKHR Device::get_surface_capabilities() const
     {
         const auto resval = m_physical_device.getSurfaceCapabilitiesKHR(m_surface);
-        MH_ASSERT_VK(resval, "Failed to get surface capabilities from Vulkan physical device.");
+        MH_ASSERT_VK(resval.result, "Failed to get surface capabilities from Vulkan physical device.");
         return resval.value;
     }
     
     std::vector<vk::SurfaceFormatKHR> Device::get_surface_formats() const
     {
         const auto resval = m_physical_device.getSurfaceFormatsKHR(m_surface);
-        MH_ASSERT_VK(resval, "Failed to get surface formats from Vulkan physical device.");
+        MH_ASSERT_VK(resval.result, "Failed to get surface formats from Vulkan physical device.");
         return resval.value;
     }
     
     std::vector<vk::PresentModeKHR> Device::get_surface_present_modes() const
     {
         const auto resval = m_physical_device.getSurfacePresentModesKHR(m_surface);
-        MH_ASSERT_VK(resval, "Failed to get surface present modes from Vulkan physical device.");
+        MH_ASSERT_VK(resval.result, "Failed to get surface present modes from Vulkan physical device.");
         return resval.value;
     }
     
-    std::vector<vk::Image> Device::get_swapchain_images(vk::SwapchainKHR swapchain) const
+    std::vector<vk::Image> Device::get_swapchain_images(const vk::SwapchainKHR swapchain) const
     {
         const auto resval = m_device.getSwapchainImagesKHR(swapchain);
-        MH_ASSERT_VK(resval, "Failed to get Vulkan swapchain images.");
+        MH_ASSERT_VK(resval.result, "Failed to get Vulkan swapchain images.");
         return resval.value;
     }
     
@@ -259,8 +259,8 @@ namespace mellohi
     }
     
     static VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-        VkDebugUtilsMessageTypeFlagsEXT message_types,
+        const VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+        const VkDebugUtilsMessageTypeFlagsEXT message_types,
         const VkDebugUtilsMessengerCallbackDataEXT *callback_data_ptr,
         void *user_data_ptr)
     {
@@ -334,7 +334,7 @@ namespace mellohi
         };
         
         const auto instance_resval = vk::createInstance(instance_create_info);
-        MH_ASSERT_VK(instance_resval, "Failed to create Vulkan instance.");
+        MH_ASSERT_VK(instance_resval.result, "Failed to create Vulkan instance.");
         m_instance = instance_resval.value;
         
         VULKAN_HPP_DEFAULT_DISPATCHER.init(m_instance);
@@ -346,7 +346,7 @@ namespace mellohi
     {
         #ifdef MH_DEBUG_MODE
             const auto resval = m_instance.createDebugUtilsMessengerEXT(debug_utils_messenger_create_info);
-            MH_ASSERT_VK(resval, "Failed to create Vulkan debug utils messenger.");
+            MH_ASSERT_VK(resval.result, "Failed to create Vulkan debug utils messenger.");
             m_debug_utils_messenger = resval.value;
         #endif
     }
@@ -354,7 +354,7 @@ namespace mellohi
     void Device::choose_physical_device()
     {
         const auto physical_devices_resval = m_instance.enumeratePhysicalDevices();
-        MH_ASSERT_VK(physical_devices_resval, "Failed to enumerate Vulkan physical devices.");
+        MH_ASSERT_VK(physical_devices_resval.result, "Failed to enumerate Vulkan physical devices.");
         const auto physical_devices = physical_devices_resval.value;
         
         MH_ASSERT(!physical_devices.empty(), "Failed to find GPUs with Vulkan support.");
@@ -438,7 +438,7 @@ namespace mellohi
         };
         
         const auto device_resval = m_physical_device.createDevice(device_create_info);
-        MH_ASSERT_VK(device_resval, "Failed to create Vulkan logical device.");
+        MH_ASSERT_VK(device_resval.result, "Failed to create Vulkan logical device.");
         m_device = device_resval.value;
         
         for (const u32 queue_family_index : get_unique_queue_family_indices())

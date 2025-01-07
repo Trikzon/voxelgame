@@ -2,7 +2,7 @@
 
 namespace mellohi
 {
-    RenderPass::RenderPass(std::shared_ptr<Device> device_ptr, std::shared_ptr<Swapchain> swapchain_ptr)
+    RenderPass::RenderPass(const std::shared_ptr<Device> device_ptr, const std::shared_ptr<Swapchain> swapchain_ptr)
         : m_device_ptr(device_ptr), m_swapchain_ptr(swapchain_ptr)
     {
         create_render_pass();
@@ -39,7 +39,7 @@ namespace mellohi
         };
         
         const auto result = command_buffer.begin(command_buffer_begin_info);
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to begin recording Vulkan command buffer.");
+        MH_ASSERT_VK(result, "Failed to begin recording Vulkan command buffer.");
         
         // TODO: Make clear color configurable.
         const vk::ClearValue clear_value
@@ -88,12 +88,13 @@ namespace mellohi
         return true;
     }
     
-    void RenderPass::bind_graphics_pipeline(vk::Pipeline graphics_pipeline)
+    void RenderPass::bind_graphics_pipeline(const vk::Pipeline graphics_pipeline)
     {
         get_current_command_buffer().bindPipeline(vk::PipelineBindPoint::eGraphics, graphics_pipeline);
     }
     
-    void RenderPass::draw(u32 vertex_count, u32 instance_count, u32 first_vertex, u32 first_instance)
+    void RenderPass::draw(const u32 vertex_count, const u32 instance_count,
+                          const u32 first_vertex, const u32 first_instance)
     {
         get_current_command_buffer().draw(vertex_count, instance_count, first_vertex, first_instance);
     }
@@ -107,7 +108,7 @@ namespace mellohi
         command_buffer.endRenderPass();
         
         const auto result = command_buffer.end();
-        MH_ASSERT(result == vk::Result::eSuccess, "Failed to end recording Vulkan command buffer.");
+        MH_ASSERT_VK(result, "Failed to end recording Vulkan command buffer.");
         
         m_swapchain_ptr->present(m_current_image_index_opt.value(), command_buffer);
         
