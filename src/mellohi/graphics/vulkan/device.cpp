@@ -12,6 +12,7 @@ namespace mellohi
         create_debug_utils_messenger();
         choose_physical_device();
         create_device();
+        choose_preferred_surface_format();
     }
     
     Device::~Device()
@@ -187,6 +188,11 @@ namespace mellohi
     vk::PhysicalDevice Device::get_physical_device() const
     {
         return m_physical_device;
+    }
+    
+    vk::SurfaceFormatKHR Device::get_preferred_surface_format() const
+    {
+        return m_preferred_surface_format;
     }
     
     vk::Queue Device::get_queue(QueueCapability capability) const
@@ -440,6 +446,22 @@ namespace mellohi
             vk::Queue queue;
             m_device.getQueue(queue_family_index, 0, &queue);
             m_queues.try_emplace(queue_family_index, queue);
+        }
+    }
+    
+    void Device::choose_preferred_surface_format()
+    {
+        const auto available_formats = get_surface_formats();
+        m_preferred_surface_format = available_formats[0];
+        
+        for (const auto &available_format : available_formats)
+        {
+            if (available_format.format == vk::Format::eB8G8R8A8Srgb
+                && available_format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+            {
+                m_preferred_surface_format = available_format;
+                break;
+            }
         }
     }
     

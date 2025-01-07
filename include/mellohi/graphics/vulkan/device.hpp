@@ -48,6 +48,7 @@ namespace mellohi
         [[nodiscard]] vk::Device get_device() const;
         [[nodiscard]] vk::Instance get_instance() const;
         [[nodiscard]] vk::PhysicalDevice get_physical_device() const;
+        [[nodiscard]] vk::SurfaceFormatKHR get_preferred_surface_format() const;
         [[nodiscard]] vk::Queue get_queue(QueueCapability capability) const;
         [[nodiscard]] u32 get_queue_family_index(QueueCapability capability) const;
         [[nodiscard]] vk::SurfaceKHR get_surface() const;
@@ -65,11 +66,13 @@ namespace mellohi
         vk::Device m_device;
         std::unordered_map<QueueCapability, u32> m_queue_family_indices;
         std::unordered_map<u32, vk::Queue> m_queues;
+        vk::SurfaceFormatKHR m_preferred_surface_format;
         
         void create_instance(const Config &config, const Platform &platform);
         void create_debug_utils_messenger();
         void choose_physical_device();
         void create_device();
+        void choose_preferred_surface_format();
         
         static std::vector<const char *> get_required_instance_extensions(const Platform &platform);
         static std::vector<const char *> get_required_device_extensions();
