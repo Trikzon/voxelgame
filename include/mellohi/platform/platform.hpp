@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "mellohi/core/config.hpp"
+#include "mellohi/core/assets/config_assets.hpp"
 #ifdef MH_GRAPHICS_VULKAN
     #include "mellohi/graphics/vulkan/vulkan.hpp"
 #endif
@@ -28,5 +28,5 @@ namespace mellohi
         #endif
     };
     
-    std::shared_ptr<Platform> init_platform(const Config &config);
+    std::shared_ptr<Platform> init_platform(std::shared_ptr<EngineConfigAsset> engine_config_ptr);
 }

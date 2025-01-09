@@ -14,7 +14,7 @@ namespace mellohi
     class Device
     {
     public:
-        Device(const Config &config, const Platform &platform);
+        Device(const EngineConfigAsset &engine_config, const Platform &platform);
         ~Device();
         
         void reset_fence(vk::Fence fence) const;
@@ -68,7 +68,7 @@ namespace mellohi
         std::unordered_map<u32, vk::Queue> m_queues;
         vk::SurfaceFormatKHR m_preferred_surface_format;
         
-        void create_instance(const Config &config, const Platform &platform);
+        void create_instance(const EngineConfigAsset &engine_config, const Platform &platform);
         void create_debug_utils_messenger();
         void choose_physical_device();
         void create_device();

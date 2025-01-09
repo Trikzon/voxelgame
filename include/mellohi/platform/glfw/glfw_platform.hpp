@@ -10,11 +10,11 @@
 
 namespace mellohi
 {
-    class GLFWPlatform final : public Platform
+    class GlfwPlatform final : public Platform
     {
     public:
-        explicit GLFWPlatform(const Config &config);
-        ~GLFWPlatform() override;
+        explicit GlfwPlatform(std::shared_ptr<EngineConfigAsset> engine_config_ptr);
+        ~GlfwPlatform() override;
         
         void process_events() override;
         
@@ -30,6 +30,10 @@ namespace mellohi
         #endif
         
     private:
-        GLFWwindow *m_window_ptr = nullptr;
+        std::shared_ptr<EngineConfigAsset> m_engine_config_ptr{};
+        usize m_engine_config_reloaded_callback_id{};
+        GLFWwindow *m_window_ptr{};
+        
+        void on_engine_config_reloaded();
     };
 }

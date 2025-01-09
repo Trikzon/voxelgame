@@ -5,10 +5,10 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace mellohi
 {
-    Device::Device(const Config &config, const Platform &platform)
+    Device::Device(const EngineConfigAsset &engine_config, const Platform &platform)
     {
         VULKAN_HPP_DEFAULT_DISPATCHER.init();
-        create_instance(config, platform);
+        create_instance(engine_config, platform);
         create_debug_utils_messenger();
         choose_physical_device();
         create_device();
@@ -298,13 +298,16 @@ namespace mellohi
         .pUserData = {},
     };
     
-    void Device::create_instance(const Config &config, const Platform &platform)
+    void Device::create_instance(const EngineConfigAsset &engine_config, const Platform &platform)
     {
+        const auto app_name = engine_config.get_game_name();
+        const auto engine_name = engine_config.get_engine_name();
+        
         const vk::ApplicationInfo app_info
         {
-            .pApplicationName = config.game.name.c_str(),
+            .pApplicationName = app_name.c_str(),
             .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-            .pEngineName = config.engine.name.c_str(),
+            .pEngineName = engine_name.c_str(),
             .engineVersion = VK_MAKE_VERSION(1, 0, 0),
             .apiVersion = VK_API_VERSION_1_3,
         };

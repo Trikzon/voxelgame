@@ -8,7 +8,7 @@ namespace mellohi
     class VulkanGraphics final : public Graphics
     {
     public:
-        VulkanGraphics(const Config &config, std::shared_ptr<Platform> platform_ptr);
+        VulkanGraphics(std::shared_ptr<EngineConfigAsset> engine_config_ptr, std::shared_ptr<Platform> platform_ptr);
         ~VulkanGraphics() override;
         
         void draw_frame() override;

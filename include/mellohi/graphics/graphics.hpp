@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "mellohi/core/config.hpp"
 #include "mellohi/platform/platform.hpp"
 
 namespace mellohi
@@ -15,5 +14,6 @@ namespace mellohi
         virtual void draw_frame() = 0;
     };
     
-    std::shared_ptr<Graphics> init_graphics(const Config &config, std::shared_ptr<Platform> platform_ptr);
+    std::shared_ptr<Graphics> init_graphics(std::shared_ptr<EngineConfigAsset> engine_config_ptr, 
+                                            std::shared_ptr<Platform> platform_ptr);
 }

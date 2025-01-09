@@ -1,12 +1,11 @@
 #include "mellohi/graphics/vulkan/vulkan_graphics.hpp"
 
-#include "mellohi/core/asset.hpp"
-
 namespace mellohi
 {
-    VulkanGraphics::VulkanGraphics(const Config &config, const std::shared_ptr<Platform> platform_ptr)
+    VulkanGraphics::VulkanGraphics(const std::shared_ptr<EngineConfigAsset> engine_config_ptr,
+                                   const std::shared_ptr<Platform> platform_ptr)
     {
-        m_device_ptr = std::make_shared<Device>(config, *platform_ptr);
+        m_device_ptr = std::make_shared<Device>(*engine_config_ptr, *platform_ptr);
         m_swapchain_ptr = std::make_shared<Swapchain>(platform_ptr, m_device_ptr);
         m_render_pass_ptr = std::make_shared<RenderPass>(m_device_ptr, m_swapchain_ptr);
         create_graphics_pipeline();
@@ -33,8 +32,8 @@ namespace mellohi
     
     void VulkanGraphics::create_graphics_pipeline()
     {
-        const auto vert_shader_code = Asset("sandbox:vert.spv").read_file_as_bytes();
-        const auto frag_shader_code = Asset("sandbox:frag.spv").read_file_as_bytes();
+        const auto vert_shader_code = AssetId("sandbox:vert.spv").read_file_as_bytes();
+        const auto frag_shader_code = AssetId("sandbox:frag.spv").read_file_as_bytes();
         
         const vk::ShaderModuleCreateInfo vert_shader_module_create_info
         {

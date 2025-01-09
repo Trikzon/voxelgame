@@ -6,10 +6,10 @@
 
 namespace mellohi
 {
-    std::shared_ptr<Platform> init_platform(const Config &config)
+    std::shared_ptr<Platform> init_platform(const std::shared_ptr<EngineConfigAsset> engine_config_ptr)
     {
         #ifdef MH_PLATFORM_GLFW
-            return std::make_shared<GLFWPlatform>(config);
+            return std::make_shared<GlfwPlatform>(engine_config_ptr);
         #else
             MH_ASSERT(false, "No platform backend has been selected.");
             return nullptr;

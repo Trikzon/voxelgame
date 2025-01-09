@@ -1,16 +1,13 @@
 #include "mellohi/core/engine.hpp"
 
-#include "mellohi/core/logger.hpp"
-
 namespace mellohi
 {
     Engine::Engine()
     {
-        MH_INFO("Game Assets Dir: {}", MH_GAME_ASSETS_DIR);
-        MH_INFO("Engine Assets Dir: {}", MH_ENGINE_ASSETS_DIR);
-        
-        m_platform_ptr = init_platform(m_config);
-        m_graphics_ptr = init_graphics(m_config, m_platform_ptr);
+        m_asset_manager_ptr = std::make_shared<AssetManager>();
+        m_engine_config_ptr = m_asset_manager_ptr->load<EngineConfigAsset>(AssetId(":engine.toml"));
+        m_platform_ptr = init_platform(m_engine_config_ptr);
+        m_graphics_ptr = init_graphics(m_engine_config_ptr, m_platform_ptr);
     }
     
     void Engine::run(Game &game)
@@ -27,9 +24,19 @@ namespace mellohi
         }
     }
     
-    const Config & Engine::get_config() const
+    std::shared_ptr<AssetManager> Engine::get_asset_manager_ptr() const
     {
-        return m_config;
+        return m_asset_manager_ptr;
+    }
+    
+    std::shared_ptr<EngineConfigAsset> Engine::get_engine_config_ptr() const
+    {
+        return m_engine_config_ptr;
+    }
+    
+    std::shared_ptr<Graphics> Engine::get_graphics_ptr() const
+    {
+        return m_graphics_ptr;
     }
     
     std::shared_ptr<Platform> Engine::get_platform_ptr() const

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "mellohi/core/assets/asset_manager.hpp"
 #include "mellohi/graphics/graphics.hpp"
 #include "mellohi/platform/platform.hpp"
 
@@ -23,15 +24,14 @@ namespace mellohi
         
         void run(Game &game);
         
-        [[nodiscard]]
-        const Config & get_config() const;
-        [[nodiscard]]
-        std::shared_ptr<Platform> get_platform_ptr() const;
-        [[nodiscard]]
-        std::shared_ptr<Graphics> get_graphics_ptr() const;
+        [[nodiscard]] std::shared_ptr<AssetManager> get_asset_manager_ptr() const;
+        [[nodiscard]] std::shared_ptr<EngineConfigAsset> get_engine_config_ptr() const;
+        [[nodiscard]] std::shared_ptr<Graphics> get_graphics_ptr() const;
+        [[nodiscard]] std::shared_ptr<Platform> get_platform_ptr() const;
     
     private:
-        Config m_config;
+        std::shared_ptr<AssetManager> m_asset_manager_ptr;
+        std::shared_ptr<EngineConfigAsset> m_engine_config_ptr;
         std::shared_ptr<Platform> m_platform_ptr;
         std::shared_ptr<Graphics> m_graphics_ptr;
     };

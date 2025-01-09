@@ -4,5 +4,4 @@ package = "mellohi"
 
 [window]
 title = "Mellohi Window"
-width = 1280
-height = 720
+initial_size = [1280, 720]

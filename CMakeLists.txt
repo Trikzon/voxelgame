@@ -9,32 +9,36 @@ option(MH_GRAPHICS_VULKAN "Enable Vulkan graphics backend" ON)
 option(MH_PLATFORM_GLFW   "Enable GLFW platform backend"   ON)
 
 set(INCLUDES
-    include/mellohi/core/asset.hpp
-    include/mellohi/core/config.hpp
+    include/mellohi/core/assets/asset.hpp
+    include/mellohi/core/assets/asset_id.hpp
+    include/mellohi/core/assets/asset_manager.hpp
+    include/mellohi/core/assets/config_assets.hpp
     include/mellohi/core/engine.hpp
     include/mellohi/core/logger.hpp
     include/mellohi/core/types.hpp
-    include/mellohi/graphics/graphics.hpp
     include/mellohi/graphics/vulkan/device.hpp
     include/mellohi/graphics/vulkan/render_pass.hpp
     include/mellohi/graphics/vulkan/swapchain.hpp
     include/mellohi/graphics/vulkan/vulkan.hpp
     include/mellohi/graphics/vulkan/vulkan_graphics.hpp
-    include/mellohi/platform/platform.hpp
+    include/mellohi/graphics/graphics.hpp
     include/mellohi/platform/glfw/glfw_platform.hpp
+    include/mellohi/platform/platform.hpp
 )
 
 set(SOURCES
-    src/mellohi/core/asset.cpp
-    src/mellohi/core/config.cpp
+    src/mellohi/core/assets/asset.cpp
+    src/mellohi/core/assets/asset_id.cpp
+    src/mellohi/core/assets/asset_manager.cpp
+    src/mellohi/core/assets/config_assets.cpp
     src/mellohi/core/engine.cpp
-    src/mellohi/graphics/graphics.cpp
     src/mellohi/graphics/vulkan/device.cpp
     src/mellohi/graphics/vulkan/render_pass.cpp
     src/mellohi/graphics/vulkan/swapchain.cpp
     src/mellohi/graphics/vulkan/vulkan_graphics.cpp
-    src/mellohi/platform/platform.cpp
+    src/mellohi/graphics/graphics.cpp
     src/mellohi/platform/glfw/glfw_platform.cpp
+    src/mellohi/platform/platform.cpp
 )
 
 add_library(mellohi STATIC ${SOURCES} ${INCLUDES})

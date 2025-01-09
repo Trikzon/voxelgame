@@ -1,3 +1,5 @@
+#include <mellohi/core/assets/asset_manager.hpp>
+#include <mellohi/core/assets/config_assets.hpp>
 #include <mellohi/core/engine.hpp>
 #include <mellohi/core/logger.hpp>
 
@@ -8,7 +10,8 @@ class SandboxGame : public Game
 public:
     void init(Engine &engine) override
     {
-        
+        auto a = engine.get_engine_config_ptr();
+        a->reload();
     }
     
     void process(Engine &engine) override
