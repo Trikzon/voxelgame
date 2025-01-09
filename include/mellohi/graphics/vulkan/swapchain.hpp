@@ -9,7 +9,8 @@ namespace mellohi
     public:
         const static usize MAX_FRAMES_IN_FLIGHT = 2;
     
-        Swapchain(std::shared_ptr<Platform> platform_ptr, std::shared_ptr<Device> device_ptr);
+        Swapchain(std::shared_ptr<EngineConfigAsset> engine_config_ptr, std::shared_ptr<Platform> platform_ptr,
+                  std::shared_ptr<Device> device_ptr);
         ~Swapchain();
         
         void init_with_render_pass(vk::RenderPass render_pass);
@@ -24,10 +25,14 @@ namespace mellohi
         [[nodiscard]] vk::Framebuffer get_framebuffer(u32 image_index) const;
 
     private:
+        std::shared_ptr<EngineConfigAsset> m_engine_config_ptr;
+        usize m_engine_config_reloaded_callback_id;
+        
         std::shared_ptr<Platform> m_platform_ptr;
         std::shared_ptr<Device> m_device_ptr;
         vk::RenderPass m_render_pass;
 
+        bool m_should_be_recreated;
         vk::SwapchainKHR m_swapchain;
         vk::Extent2D m_extent;
         std::vector<vk::ImageView> m_image_views;
@@ -45,5 +50,7 @@ namespace mellohi
         
         void recreate();
         void destroy();
+        
+        void on_engine_config_reloaded();
     };
 }

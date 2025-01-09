@@ -7,7 +7,8 @@ namespace mellohi
     class RenderPass
     {
     public:
-        RenderPass(std::shared_ptr<Device> device_ptr, std::shared_ptr<Swapchain> swapchain_ptr);
+        RenderPass(std::shared_ptr<EngineConfigAsset> engine_config_ptr, std::shared_ptr<Device> device_ptr,
+                   std::shared_ptr<Swapchain> swapchain_ptr);
         ~RenderPass();
         
         [[nodiscard]] bool begin();
@@ -19,6 +20,7 @@ namespace mellohi
         [[nodiscard]] vk::RenderPass get_render_pass() const;
         
     private:
+        std::shared_ptr<EngineConfigAsset> m_engine_config_ptr;
         std::shared_ptr<Device> m_device_ptr;
         std::shared_ptr<Swapchain> m_swapchain_ptr;
     

@@ -8,13 +8,16 @@ namespace mellohi
         : m_engine_config_ptr(engine_config_ptr)
     {
         m_engine_config_reloaded_callback_id = engine_config_ptr->register_reload_callback(
-            std::bind(&GlfwPlatform::on_engine_config_reloaded, this));
+            std::bind(&GlfwPlatform::on_engine_config_reloaded, this)
+        );
         
         MH_ASSERT(glfwInit(), "Failed to initialize GLFW.");
         
         #ifdef MH_GRAPHICS_VULKAN
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         #endif
+        
+        glfwWindowHint(GLFW_RESIZABLE, engine_config_ptr->get_window_resizable());
         
         const auto initial_size = engine_config_ptr->get_window_initial_size();
         
@@ -35,6 +38,12 @@ namespace mellohi
     void GlfwPlatform::process_events()
     {
         glfwPollEvents();
+        
+        // TODO: Move to a command.
+        if (glfwGetKey(m_window_ptr, GLFW_KEY_R) == GLFW_PRESS)
+        {
+            m_engine_config_ptr->reload();
+        }
     }
     
     bool GlfwPlatform::close_requested() const
@@ -80,5 +89,6 @@ namespace mellohi
     void GlfwPlatform::on_engine_config_reloaded()
     {
         glfwSetWindowTitle(m_window_ptr, m_engine_config_ptr->get_window_title().c_str());
+        glfwSetWindowAttrib(m_window_ptr, GLFW_RESIZABLE, m_engine_config_ptr->get_window_resizable());
     }
 }

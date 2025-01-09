@@ -2,8 +2,9 @@
 
 namespace mellohi
 {
-    RenderPass::RenderPass(const std::shared_ptr<Device> device_ptr, const std::shared_ptr<Swapchain> swapchain_ptr)
-        : m_device_ptr(device_ptr), m_swapchain_ptr(swapchain_ptr)
+    RenderPass::RenderPass(const std::shared_ptr<EngineConfigAsset> engine_config_ptr,
+                           const std::shared_ptr<Device> device_ptr, const std::shared_ptr<Swapchain> swapchain_ptr)
+        : m_engine_config_ptr(engine_config_ptr), m_device_ptr(device_ptr), m_swapchain_ptr(swapchain_ptr)
     {
         create_render_pass();
         swapchain_ptr->init_with_render_pass(m_render_pass);
@@ -41,13 +42,12 @@ namespace mellohi
         const auto result = command_buffer.begin(command_buffer_begin_info);
         MH_ASSERT_VK(result, "Failed to begin recording Vulkan command buffer.");
         
-        // TODO: Make clear color configurable.
         const vk::ClearValue clear_value
         {
             .color = vk::ClearColorValue
             {
-                .float32 = std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f},
-            }
+                .float32 = m_engine_config_ptr->get_window_clear_color().srgb_to_linear().as_array()
+            },
         };
         
         const auto swapchain_extent = m_swapchain_ptr->get_extent();

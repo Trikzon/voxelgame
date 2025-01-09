@@ -3,5 +3,8 @@ name = "Mellohi"
 package = "mellohi"
 
 [window]
+clear_color = "#6495ED"
+initial_size = [480, 360]
+resizable = true
 title = "Mellohi Window"
-initial_size = [1280, 720]
+vsync = false

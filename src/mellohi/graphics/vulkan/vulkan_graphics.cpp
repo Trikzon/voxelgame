@@ -6,8 +6,8 @@ namespace mellohi
                                    const std::shared_ptr<Platform> platform_ptr)
     {
         m_device_ptr = std::make_shared<Device>(*engine_config_ptr, *platform_ptr);
-        m_swapchain_ptr = std::make_shared<Swapchain>(platform_ptr, m_device_ptr);
-        m_render_pass_ptr = std::make_shared<RenderPass>(m_device_ptr, m_swapchain_ptr);
+        m_swapchain_ptr = std::make_shared<Swapchain>(engine_config_ptr, platform_ptr, m_device_ptr);
+        m_render_pass_ptr = std::make_shared<RenderPass>(engine_config_ptr, m_device_ptr, m_swapchain_ptr);
         create_graphics_pipeline();
     }
     

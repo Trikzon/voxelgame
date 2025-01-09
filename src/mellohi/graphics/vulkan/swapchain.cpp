@@ -2,9 +2,14 @@
 
 namespace mellohi
 {
-    Swapchain::Swapchain(const std::shared_ptr<Platform> platform_ptr, const std::shared_ptr<Device> device_ptr)
-        : m_platform_ptr(platform_ptr), m_device_ptr(device_ptr)
+    Swapchain::Swapchain(const std::shared_ptr<EngineConfigAsset> engine_config_ptr,
+                         const std::shared_ptr<Platform> platform_ptr, const std::shared_ptr<Device> device_ptr)
+        : m_engine_config_ptr(engine_config_ptr), m_platform_ptr(platform_ptr), m_device_ptr(device_ptr)
     {
+        m_engine_config_reloaded_callback_id = engine_config_ptr->register_reload_callback(
+            std::bind(&Swapchain::on_engine_config_reloaded, this)
+        );
+        
         create_swapchain();
         create_image_views();
         create_sync_objects();
@@ -12,6 +17,8 @@ namespace mellohi
 
     Swapchain::~Swapchain()
     {
+        m_engine_config_ptr->deregister_reload_callback(m_engine_config_reloaded_callback_id);
+        
         destroy();
         
         for (auto i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
@@ -86,7 +93,7 @@ namespace mellohi
         };
         
         result = graphics_queue.presentKHR(present_info);
-        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+        if (m_should_be_recreated || result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             recreate();
         }
@@ -125,12 +132,12 @@ namespace mellohi
     
     void Swapchain::create_swapchain()
     {
-        // TODO: Make the present mode configurable.
         const auto available_present_modes = m_device_ptr->get_surface_present_modes();
         auto present_mode = vk::PresentModeKHR::eFifo;
         for (const auto &available_present_mode : available_present_modes)
         {
-            if (available_present_mode == vk::PresentModeKHR::eMailbox)
+            if (m_engine_config_ptr->get_window_vsync() && available_present_mode == vk::PresentModeKHR::eMailbox
+                || !m_engine_config_ptr->get_window_vsync() && available_present_mode == vk::PresentModeKHR::eImmediate)
             {
                 present_mode = available_present_mode;
                 break;
@@ -260,6 +267,8 @@ namespace mellohi
         create_swapchain();
         create_image_views();
         create_framebuffers();
+        
+        m_should_be_recreated = false;
     }
     
     void Swapchain::destroy()
@@ -280,5 +289,10 @@ namespace mellohi
         
         m_device_ptr->destroy_swapchain(m_swapchain);
         m_swapchain = nullptr;
+    }
+    
+    void Swapchain::on_engine_config_reloaded()
+    {
+        m_should_be_recreated = true;
     }
 }
