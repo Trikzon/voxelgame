@@ -9,7 +9,7 @@ namespace mellohi
     class Asset
     {
     public:
-        explicit Asset(const AssetId &asset_id);
+        Asset(std::shared_ptr<class AssetManager> asset_manager_ptr, const AssetId &asset_id);
         virtual ~Asset();
         
         void reload();
@@ -31,7 +31,7 @@ namespace mellohi
     class TextAsset : public Asset
     {
     public:
-        explicit TextAsset(const AssetId &asset_id);
+        TextAsset(std::shared_ptr<class AssetManager> asset_manager, const AssetId &asset_id);
         
         const std::string & get_text() const;
         

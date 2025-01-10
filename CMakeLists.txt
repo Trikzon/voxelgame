@@ -13,6 +13,7 @@ set(INCLUDES
     include/mellohi/core/assets/asset_id.hpp
     include/mellohi/core/assets/asset_manager.hpp
     include/mellohi/core/assets/config_assets.hpp
+    include/mellohi/core/assets/toml_asset.hpp
     include/mellohi/core/color.hpp
     include/mellohi/core/engine.hpp
     include/mellohi/core/logger.hpp
@@ -32,6 +33,7 @@ set(SOURCES
     src/mellohi/core/assets/asset_id.cpp
     src/mellohi/core/assets/asset_manager.cpp
     src/mellohi/core/assets/config_assets.cpp
+    src/mellohi/core/assets/toml_asset.cpp
     src/mellohi/core/color.cpp
     src/mellohi/core/engine.cpp
     src/mellohi/graphics/vulkan/device.cpp

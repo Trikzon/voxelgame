@@ -1,14 +1,14 @@
 #pragma once
 
-#include "mellohi/core/assets/asset.hpp"
+#include "mellohi/core/assets/toml_asset.hpp"
 #include "mellohi/core/color.hpp"
 
 namespace mellohi
 {
-    class GameConfigAsset : public Asset
+    class GameConfigAsset : public TomlAsset
     {
     public:
-        explicit GameConfigAsset(const AssetId &asset_id);
+        GameConfigAsset(std::shared_ptr<AssetManager> asset_manager_ptr, const AssetId &asset_id);
         
         std::string get_game_name() const;
         std::string get_game_package() const;
@@ -24,7 +24,7 @@ namespace mellohi
         {
             std::string name;
             std::string package;
-        } m_game;
+        } m_game{};
     
         struct
         {
@@ -33,15 +33,15 @@ namespace mellohi
             std::optional<bool> resizable_opt;
             std::optional<std::string> title_opt;
             std::optional<bool> vsync_opt;
-        } m_window;
+        } m_window{};
     
         void load() override;
     };
     
-    class EngineConfigAsset : public Asset
+    class EngineConfigAsset : public TomlAsset
     {
     public:
-        explicit EngineConfigAsset(const AssetId &asset_id);
+        EngineConfigAsset(std::shared_ptr<AssetManager> asset_manager_ptr, const AssetId &asset_id);
         
         std::string get_engine_name() const;
         std::string get_engine_package() const;
@@ -60,7 +60,7 @@ namespace mellohi
         {
             std::string name;
             std::string package;
-        } m_engine;
+        } m_engine{};
         
         struct
         {
@@ -69,9 +69,9 @@ namespace mellohi
             bool resizable;
             std::string title;
             bool vsync;
-        } m_window;
+        } m_window{};
         
-        GameConfigAsset m_game_config;
+        std::shared_ptr<GameConfigAsset> m_game_config;
         
         void load() override;
     };

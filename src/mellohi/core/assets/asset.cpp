@@ -1,10 +1,11 @@
 #include "mellohi/core/assets/asset.hpp"
 
+#include "mellohi/core/assets/asset_manager.hpp"
 #include "mellohi/core/logger.hpp"
 
 namespace mellohi
 {
-    Asset::Asset(const AssetId &asset_id) : m_id(asset_id)
+    Asset::Asset(const std::shared_ptr<AssetManager> asset_manager_ptr, const AssetId &asset_id) : m_id(asset_id)
     {
         MH_TRACE("Asset {} constructed.", asset_id);
     }
@@ -44,7 +45,8 @@ namespace mellohi
         return m_id;
     }
     
-    TextAsset::TextAsset(const AssetId &asset_id) : Asset(asset_id)
+    TextAsset::TextAsset(const std::shared_ptr<AssetManager> asset_manager_ptr, const AssetId &asset_id)
+        : Asset(asset_manager_ptr, asset_id)
     {
         load();
     }

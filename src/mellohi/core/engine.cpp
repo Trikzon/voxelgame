@@ -7,7 +7,7 @@ namespace mellohi
         m_asset_manager_ptr = std::make_shared<AssetManager>();
         m_engine_config_ptr = m_asset_manager_ptr->load<EngineConfigAsset>(AssetId(":engine.toml"));
         m_platform_ptr = init_platform(m_engine_config_ptr);
-        m_graphics_ptr = init_graphics(m_engine_config_ptr, m_platform_ptr);
+        m_graphics_ptr = init_graphics(m_asset_manager_ptr, m_platform_ptr);
     }
     
     void Engine::run(Game &game)

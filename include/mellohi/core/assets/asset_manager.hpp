@@ -5,7 +5,7 @@
 
 namespace mellohi
 {
-    class AssetManager
+    class AssetManager : public std::enable_shared_from_this<AssetManager>
     {
     public:
         AssetManager();
@@ -31,7 +31,7 @@ namespace mellohi
             }
         }
         
-        const auto asset = std::make_shared<T>(asset_id);
+        const auto asset = std::make_shared<T>(shared_from_this(), asset_id);
         m_assets[asset_id] = asset;
         return asset;
     }

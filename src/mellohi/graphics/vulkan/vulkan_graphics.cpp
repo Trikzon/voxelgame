@@ -2,9 +2,12 @@
 
 namespace mellohi
 {
-    VulkanGraphics::VulkanGraphics(const std::shared_ptr<EngineConfigAsset> engine_config_ptr,
+    VulkanGraphics::VulkanGraphics(const std::shared_ptr<AssetManager> asset_manager_ptr,
                                    const std::shared_ptr<Platform> platform_ptr)
+        : m_asset_manager_ptr(asset_manager_ptr)
     {
+        const auto engine_config_ptr = asset_manager_ptr->load<EngineConfigAsset>(AssetId(":engine.toml"));
+        
         m_device_ptr = std::make_shared<Device>(*engine_config_ptr, *platform_ptr);
         m_swapchain_ptr = std::make_shared<Swapchain>(engine_config_ptr, platform_ptr, m_device_ptr);
         m_render_pass_ptr = std::make_shared<RenderPass>(engine_config_ptr, m_device_ptr, m_swapchain_ptr);
@@ -16,7 +19,6 @@ namespace mellohi
         m_device_ptr->wait_idle();
         
         m_device_ptr->destroy_pipeline(m_graphics_pipeline);
-        m_device_ptr->destroy_pipeline_layout(m_pipeline_layout);
     }
     
     void VulkanGraphics::draw_frame()
@@ -148,7 +150,7 @@ namespace mellohi
             .pPushConstantRanges = nullptr,
         };
         
-        m_pipeline_layout = m_device_ptr->create_pipeline_layout(pipeline_layout_create_info);
+        const auto pipeline_layout = m_device_ptr->create_pipeline_layout(pipeline_layout_create_info);
         
         const vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info
         {
@@ -162,7 +164,7 @@ namespace mellohi
             .pDepthStencilState = nullptr,
             .pColorBlendState = &color_blend_state_create_info,
             .pDynamicState = &dynamic_state_create_info,
-            .layout = m_pipeline_layout,
+            .layout = pipeline_layout,
             .renderPass = m_render_pass_ptr->get_render_pass(),
             .subpass = 0,
             .basePipelineHandle = nullptr,
@@ -171,6 +173,7 @@ namespace mellohi
         
         m_graphics_pipeline = m_device_ptr->create_graphics_pipeline(graphics_pipeline_create_info);
         
+        m_device_ptr->destroy_pipeline_layout(pipeline_layout);
         m_device_ptr->destroy_shader_module(frag_shader_module);
         m_device_ptr->destroy_shader_module(vert_shader_module);
     }
