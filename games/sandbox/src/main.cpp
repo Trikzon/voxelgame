@@ -10,13 +10,17 @@ class SandboxGame : public Game
 public:
     void init(Engine &engine) override
     {
-        auto a = engine.get_engine_config_ptr();
-        a->reload();
+        
     }
     
     void process(Engine &engine) override
     {
-        
+        // TODO: Move to a command.
+        if (engine.get_platform_ptr()->reload_pressed())
+        {
+            MH_TRACE("Reload all assets.");
+            engine.get_asset_manager_ptr()->reload_all();
+        }
     }
 };
 

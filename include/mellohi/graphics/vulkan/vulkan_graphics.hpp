@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mellohi/graphics/graphics.hpp"
-#include "mellohi/graphics/vulkan/render_pass.hpp"
+#include "mellohi/graphics/vulkan/assets/vulkan_material.hpp"
 
 namespace mellohi
 {
@@ -18,7 +18,7 @@ namespace mellohi
         std::shared_ptr<Device> m_device_ptr;
         std::shared_ptr<Swapchain> m_swapchain_ptr;
         std::shared_ptr<RenderPass> m_render_pass_ptr;
-        vk::Pipeline m_graphics_pipeline;
+        std::shared_ptr<VulkanMaterial> m_triangle_material_ptr;
         
         void create_graphics_pipeline();
     };

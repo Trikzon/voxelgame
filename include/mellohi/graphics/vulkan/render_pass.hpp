@@ -16,6 +16,8 @@ namespace mellohi
         void draw(u32 vertex_count, u32 instance_count, u32 first_vertex, u32 first_instance);
         void end();
         
+        void defer_until_frame_ended(const std::function<void()> &callback);
+        
         [[nodiscard]] vk::CommandBuffer get_current_command_buffer() const;
         [[nodiscard]] vk::RenderPass get_render_pass() const;
         
@@ -29,8 +31,12 @@ namespace mellohi
         std::vector<vk::CommandBuffer> m_command_buffers;
         std::optional<u32> m_current_image_index_opt;
         
+        std::vector<std::function<void()>> m_frame_ended_callbacks;
+        
         void create_render_pass();
         void create_command_pool();
         void create_command_buffers();
+        
+        void resolve_frame_ended_callbacks();
     };
 }

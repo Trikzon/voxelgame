@@ -19,6 +19,9 @@ namespace mellohi
         void process_events() override;
         
         [[nodiscard]]
+        bool reload_pressed() const override;
+        
+        [[nodiscard]]
         bool close_requested() const override;
         [[nodiscard]]
         uvec2 get_framebuffer_size() const override;

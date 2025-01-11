@@ -38,12 +38,11 @@ namespace mellohi
     void GlfwPlatform::process_events()
     {
         glfwPollEvents();
-        
-        // TODO: Move to a command.
-        if (glfwGetKey(m_window_ptr, GLFW_KEY_R) == GLFW_PRESS)
-        {
-            m_engine_config_ptr->reload();
-        }
+    }
+    
+    bool GlfwPlatform::reload_pressed() const
+    {
+        return glfwGetKey(m_window_ptr, GLFW_KEY_R) == GLFW_PRESS;
     }
     
     bool GlfwPlatform::close_requested() const

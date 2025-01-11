@@ -18,6 +18,8 @@ set(INCLUDES
     include/mellohi/core/engine.hpp
     include/mellohi/core/logger.hpp
     include/mellohi/core/types.hpp
+    include/mellohi/graphics/assets/material.hpp
+    include/mellohi/graphics/vulkan/assets/vulkan_material.hpp
     include/mellohi/graphics/vulkan/device.hpp
     include/mellohi/graphics/vulkan/render_pass.hpp
     include/mellohi/graphics/vulkan/swapchain.hpp
@@ -36,6 +38,8 @@ set(SOURCES
     src/mellohi/core/assets/toml_asset.cpp
     src/mellohi/core/color.cpp
     src/mellohi/core/engine.cpp
+    src/mellohi/graphics/assets/material.cpp
+    src/mellohi/graphics/vulkan/assets/vulkan_material.cpp
     src/mellohi/graphics/vulkan/device.cpp
     src/mellohi/graphics/vulkan/render_pass.cpp
     src/mellohi/graphics/vulkan/swapchain.cpp

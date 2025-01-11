@@ -14,10 +14,12 @@ namespace mellohi
         TomlAsset(std::shared_ptr<AssetManager> asset_manager_ptr, const AssetId &asset_id);
         
     protected:
-        toml::table parse_toml() const;
+        toml::table parse_toml_table() const;
         
         template<typename T>
         std::optional<T> parse_opt(const toml::table &table, std::string_view path) const;
+        template<>
+        std::optional<AssetId> parse_opt(const toml::table &table, std::string_view path) const;
         template<>
         std::optional<Color> parse_opt(const toml::table &table, std::string_view path) const;
         template<>

@@ -38,6 +38,26 @@ namespace mellohi
         return !(*this == other);
     }
     
+    bool AssetId::operator<(const AssetId &other) const
+    {
+        return get_fully_qualified_path() < other.get_fully_qualified_path();
+    }
+    
+    bool AssetId::operator>(const AssetId &other) const
+    {
+        return other < *this;
+    }
+    
+    bool AssetId::operator<=(const AssetId &other) const
+    {
+        return !(other < *this);
+    }
+    
+    bool AssetId::operator>=(const AssetId &other) const
+    {
+        return !(*this < other);
+    }
+    
     std::ostream & operator<<(std::ostream &os, const AssetId &asset_id)
     {
         return os << asset_id.get_fully_qualified_path();

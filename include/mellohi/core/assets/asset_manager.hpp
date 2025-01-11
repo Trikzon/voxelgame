@@ -10,15 +10,17 @@ namespace mellohi
     public:
         AssetManager();
     
-        template<typename T>
-        std::shared_ptr<T> load(const AssetId &asset_id);
+        template<typename T, typename... Args>
+        std::shared_ptr<T> load(const AssetId &asset_id, Args&&... args);
+        
+        void reload_all();
     
     private:
         std::unordered_map<AssetId, std::weak_ptr<Asset>> m_assets;
     };
     
-    template<typename T>
-    std::shared_ptr<T> AssetManager::load(const AssetId &asset_id)
+    template<typename T, typename... Args>
+    std::shared_ptr<T> AssetManager::load(const AssetId &asset_id, Args&&... args)
     {
         const auto asset_it = m_assets.find(asset_id);
         if (asset_it != m_assets.end())
@@ -31,7 +33,7 @@ namespace mellohi
             }
         }
         
-        const auto asset = std::make_shared<T>(shared_from_this(), asset_id);
+        const auto asset = std::make_shared<T>(shared_from_this(), asset_id, std::forward<Args>(args)...);
         m_assets[asset_id] = asset;
         return asset;
     }

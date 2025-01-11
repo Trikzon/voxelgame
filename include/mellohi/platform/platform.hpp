@@ -16,6 +16,10 @@ namespace mellohi
         
         virtual void process_events() = 0;
         
+        // TODO: Create actual input system.
+        [[nodiscard]]
+        virtual bool reload_pressed() const = 0;
+        
         [[nodiscard]]
         virtual bool close_requested() const = 0;
         [[nodiscard]]

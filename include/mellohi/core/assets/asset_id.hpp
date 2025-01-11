@@ -15,6 +15,10 @@ namespace mellohi
         
         bool operator==(const AssetId &other) const;
         bool operator!=(const AssetId &other) const;
+        bool operator<(const AssetId &other) const;
+        bool operator>(const AssetId &other) const;
+        bool operator<=(const AssetId &other) const;
+        bool operator>=(const AssetId &other) const;
         friend std::ostream & operator<<(std::ostream &os, const AssetId &asset_id);
         
         const std::string & get_package() const;
