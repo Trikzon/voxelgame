@@ -1,2 +1,2 @@
-vert_shader = "sandbox:shaders/triangle.vert.spv"
-frag_shader = "sandbox:shaders/triangle.frag.spv"
+vert_shader = "sandbox:shaders/triangle.vert"
+frag_shader = "sandbox:shaders/triangle.frag"

@@ -19,7 +19,9 @@ set(INCLUDES
     include/mellohi/core/logger.hpp
     include/mellohi/core/types.hpp
     include/mellohi/graphics/assets/material.hpp
+    include/mellohi/graphics/assets/shader.hpp
     include/mellohi/graphics/vulkan/assets/vulkan_material.hpp
+    include/mellohi/graphics/vulkan/assets/vulkan_shader.hpp
     include/mellohi/graphics/vulkan/device.hpp
     include/mellohi/graphics/vulkan/render_pass.hpp
     include/mellohi/graphics/vulkan/swapchain.hpp
@@ -39,7 +41,9 @@ set(SOURCES
     src/mellohi/core/color.cpp
     src/mellohi/core/engine.cpp
     src/mellohi/graphics/assets/material.cpp
+    src/mellohi/graphics/assets/shader.cpp
     src/mellohi/graphics/vulkan/assets/vulkan_material.cpp
+    src/mellohi/graphics/vulkan/assets/vulkan_shader.cpp
     src/mellohi/graphics/vulkan/device.cpp
     src/mellohi/graphics/vulkan/render_pass.cpp
     src/mellohi/graphics/vulkan/swapchain.cpp
@@ -60,7 +64,12 @@ endif()
 
 if(MH_GRAPHICS_VULKAN)
     find_package(Vulkan REQUIRED)
-    target_link_libraries(mellohi PUBLIC Vulkan::Vulkan)
+    find_library(SHADERC_COMBINED_LIB shaderc_combined)
+    if (NOT SHADERC_COMBINED_LIB)
+        message(FATAL_ERROR "shaderc_combined not found.")
+    endif()
+
+    target_link_libraries(mellohi PUBLIC Vulkan::Vulkan ${SHADERC_COMBINED_LIB})
     target_compile_definitions(mellohi PUBLIC MH_GRAPHICS_VULKAN)
     target_compile_definitions(mellohi PUBLIC GLFW_INCLUDE_VULKAN)
 endif()

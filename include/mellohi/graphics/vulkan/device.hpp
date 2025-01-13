@@ -21,6 +21,9 @@ namespace mellohi
         void wait_for_fence(vk::Fence fence, u64 timeout = std::numeric_limits<u64>::max()) const;
         void wait_idle() const;
         
+        void push_to_deletion_queue(std::function<void()>&& deletor);
+        void flush_deletion_queue();
+        
         [[nodiscard]] std::vector<vk::CommandBuffer> allocate_command_buffers(
             const vk::CommandBufferAllocateInfo &allocate_info) const;
         [[nodiscard]] vk::CommandPool create_command_pool(const vk::CommandPoolCreateInfo &create_info) const;
@@ -67,6 +70,7 @@ namespace mellohi
         std::unordered_map<QueueCapability, u32> m_queue_family_indices;
         std::unordered_map<u32, vk::Queue> m_queues;
         vk::SurfaceFormatKHR m_preferred_surface_format;
+        std::deque<std::function<void()>> m_deletion_queue;
         
         void create_instance(const EngineConfigAsset &engine_config, const Platform &platform);
         void create_debug_utils_messenger();

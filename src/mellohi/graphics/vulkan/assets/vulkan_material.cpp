@@ -15,7 +15,7 @@ namespace mellohi
         m_frag_shader_ptr->deregister_reload_callback(m_on_frag_shader_reloaded_id);
         m_vert_shader_ptr->deregister_reload_callback(m_on_vert_shader_reloaded_id);
         
-        m_render_pass_ptr->defer_until_frame_ended(
+        m_device_ptr->push_to_deletion_queue(
             std::bind(&Device::destroy_pipeline, m_device_ptr, m_graphics_pipeline)
         );
     }
@@ -36,7 +36,7 @@ namespace mellohi
         
         if (m_graphics_pipeline)
         {
-            m_render_pass_ptr->defer_until_frame_ended(
+            m_device_ptr->push_to_deletion_queue(
                 std::bind(&Device::destroy_pipeline, m_device_ptr, m_graphics_pipeline)
             );
         }
@@ -55,7 +55,7 @@ namespace mellohi
                 m_vert_shader_ptr->deregister_reload_callback(m_on_vert_shader_reloaded_id);
             }
             
-            m_vert_shader_ptr = asset_manager.load<BinaryAsset>(vert_shader_id);
+            m_vert_shader_ptr = asset_manager.load<VulkanShader>(vert_shader_id, m_device_ptr);
             
             m_on_vert_shader_reloaded_id = m_vert_shader_ptr->register_reload_callback(
                 std::bind(&VulkanMaterial::on_shader_reloaded, this)
@@ -69,40 +69,23 @@ namespace mellohi
                 m_frag_shader_ptr->deregister_reload_callback(m_on_frag_shader_reloaded_id);
             }
             
-            m_frag_shader_ptr = asset_manager.load<BinaryAsset>(frag_shader_id);
+            m_frag_shader_ptr = asset_manager.load<VulkanShader>(frag_shader_id, m_device_ptr);
             
             m_on_frag_shader_reloaded_id = m_frag_shader_ptr->register_reload_callback(
                 std::bind(&VulkanMaterial::on_shader_reloaded, this)
             );
         }
         
-        const auto &vert_shader_code = m_vert_shader_ptr->get_bytes();
-        const auto &frag_shader_code = m_frag_shader_ptr->get_bytes();
-        
-        const vk::ShaderModuleCreateInfo vert_shader_module_create_info
-        {
-            .codeSize = vert_shader_code.size(),
-            .pCode = reinterpret_cast<const u32 *>(vert_shader_code.data()),
-        };
-        const auto vert_shader_module = m_device_ptr->create_shader_module(vert_shader_module_create_info);
-        
-        const vk::ShaderModuleCreateInfo frag_shader_module_create_info
-        {
-            .codeSize = frag_shader_code.size(),
-            .pCode = reinterpret_cast<const u32 *>(frag_shader_code.data()),
-        };
-        const auto frag_shader_module = m_device_ptr->create_shader_module(frag_shader_module_create_info);
-        
         const vk::PipelineShaderStageCreateInfo shader_stages[]
         {
             {
                 .stage = vk::ShaderStageFlagBits::eVertex,
-                .module = vert_shader_module,
+                .module = m_vert_shader_ptr->get_shader_module(),
                 .pName = "main",
             },
             {
                 .stage = vk::ShaderStageFlagBits::eFragment,
-                .module = frag_shader_module,
+                .module = m_frag_shader_ptr->get_shader_module(),
                 .pName = "main",
             },
         };
@@ -216,8 +199,6 @@ namespace mellohi
         m_graphics_pipeline = m_device_ptr->create_graphics_pipeline(graphics_pipeline_create_info);
         
         m_device_ptr->destroy_pipeline_layout(pipeline_layout);
-        m_device_ptr->destroy_shader_module(frag_shader_module);
-        m_device_ptr->destroy_shader_module(vert_shader_module);
     }
     
     void VulkanMaterial::on_shader_reloaded()

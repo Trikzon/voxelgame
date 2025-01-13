@@ -14,8 +14,6 @@ namespace mellohi
     
     RenderPass::~RenderPass()
     {
-        resolve_frame_ended_callbacks();
-        
         m_device_ptr->wait_idle();
         
         m_device_ptr->destroy_command_pool(m_command_pool);
@@ -115,16 +113,6 @@ namespace mellohi
         m_swapchain_ptr->present(m_current_image_index_opt.value(), command_buffer);
         
         m_current_image_index_opt = std::nullopt;
-        
-        if (!m_frame_ended_callbacks.empty())
-        {
-            resolve_frame_ended_callbacks();
-        }
-    }
-    
-    void RenderPass::defer_until_frame_ended(const std::function<void()> &callback)
-    {
-        m_frame_ended_callbacks.push_back(callback);
     }
     
     vk::CommandBuffer RenderPass::get_current_command_buffer() const
@@ -210,17 +198,5 @@ namespace mellohi
         };
         
         m_command_buffers = m_device_ptr->allocate_command_buffers(command_buffer_allocate_info);
-    }
-    
-    void RenderPass::resolve_frame_ended_callbacks()
-    {
-        m_device_ptr->wait_idle();
-        
-        const auto frame_ended_callbacks = m_frame_ended_callbacks;
-        m_frame_ended_callbacks.clear();
-        for (const auto &callback : frame_ended_callbacks)
-        {
-            callback();
-        }
     }
 }

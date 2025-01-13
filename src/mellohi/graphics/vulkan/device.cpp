@@ -17,6 +17,8 @@ namespace mellohi
     
     Device::~Device()
     {
+        flush_deletion_queue();
+        
         m_device.destroy();
         
         m_instance.destroySurfaceKHR(m_surface);
@@ -45,6 +47,26 @@ namespace mellohi
     {
         const auto result = m_device.waitIdle();
         MH_ASSERT_VK(result, "Failed to wait for Vulkan device.");
+    }
+    
+    void Device::push_to_deletion_queue(std::function<void()>&& deletor)
+    {
+        m_deletion_queue.push_back(deletor);
+    }
+    
+    void Device::flush_deletion_queue()
+    {
+        if (!m_deletion_queue.empty())
+        {
+            wait_idle();
+            
+            const auto deletion_queue = m_deletion_queue;
+            m_deletion_queue.clear();
+            for (auto it = deletion_queue.rbegin(); it != deletion_queue.rend(); it++)
+            {
+                (*it)();
+            }
+        }
     }
     
     std::vector<vk::CommandBuffer> Device::allocate_command_buffers(

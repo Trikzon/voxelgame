@@ -30,6 +30,7 @@ namespace mellohi
             m_render_pass_ptr->draw(3, 1, 0, 0);
             
             m_render_pass_ptr->end();
+            m_device_ptr->flush_deletion_queue();
         }
     }
 }
